@@ -241,7 +241,7 @@
             label5.AutoSize = true;
             label5.Location = new Point(581, 59);
             label5.Name = "label5";
-            label5.Size = new Size(142, 15);
+            label5.Size = new Size(174, 15);
             label5.TabIndex = 13;
             label5.Text = "Monto a convertir en ARS";
             // 
