@@ -1,3 +1,4 @@
+using DolarCalc.Clases;
 using Newtonsoft.Json;
 using System;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -7,115 +8,217 @@ namespace DolarCalc
     public partial class Form1 : Form
     {
         private double input, output;
-        private int dolarSelect;
-        private string valorSeleccionado;
-        DateTime now = DateTime.Now;
+        private List<TipoCambio> _tipoCambios;
+
         public Form1()
         {
             InitializeComponent();
-            refresh();
+            GetPrice();
         }
 
         private void btnRefresh_Click(object sender, EventArgs e)
         {
-            refresh();
+            GetPrice();
         }
 
-        private async void refresh()
+        private async void GetPrice()
         {
-
             using (var httpClient = new HttpClient())
             {
-                var uri = new Uri("https://dolarapi.com/v1/dolares/oficial");
+                var uri = new Uri("https://dolarapi.com/v1/dolares");
 
                 var response = await httpClient.GetAsync(uri);
 
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
-                    var datos = JsonConvert.DeserializeObject<dynamic>(json);
+                    _tipoCambios = JsonConvert.DeserializeObject<List<TipoCambio>>(json);
 
-                    var venta = datos.venta;
-
-                    txtOficial.Text = venta.ToString();
-                    lOficial.Text = now.ToString();
+                    ActualizarTextBoxes();
                 }
                 else
                 {
                     txtOficial.Text = "Error al obtener datos";
                 }
+                lFecha.Visible = true;
             }
-
 
             using (var httpClient = new HttpClient())
             {
-                var uri = new Uri("https://dolarapi.com/v1/dolares/blue");
+                var uri = new Uri("https://dolarapi.com/v1/cotizaciones/eur");
 
                 var response = await httpClient.GetAsync(uri);
 
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
-                    var datos = JsonConvert.DeserializeObject<dynamic>(json);
 
-                    var venta = datos.venta;
+                    // Check if the response is an array before deserializing
+                    if (json.StartsWith("["))
+                    {
+                        _tipoCambios = JsonConvert.DeserializeObject<List<TipoCambio>>(json);
+                    }
+                    else
+                    {
+                        // If not an array, deserialize to a single TipoCambio object
+                        _tipoCambios = new List<TipoCambio>() { JsonConvert.DeserializeObject<TipoCambio>(json) };
+                    }
 
-                    txtBlue.Text = venta.ToString();
-                    lBlue.Text = now.ToString();
+                    ActualizarTextBoxes();
                 }
                 else
                 {
-                    txtBlue.Text = "Error al obtener datos";
+                    txtEuro.Text = "Error al obtener datos del Euro";
                 }
             }
 
             using (var httpClient = new HttpClient())
             {
-                var uri = new Uri("https://dolarapi.com/v1/dolares/bolsa");
+                var uri = new Uri("https://dolarapi.com/v1/cotizaciones/brl");
 
                 var response = await httpClient.GetAsync(uri);
 
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
-                    var datos = JsonConvert.DeserializeObject<dynamic>(json);
 
-                    var venta = datos.venta;
+                   
+                    if (json.StartsWith("["))
+                    {
+                        _tipoCambios = JsonConvert.DeserializeObject<List<TipoCambio>>(json);
+                    }
+                    else
+                    {
+                        _tipoCambios = new List<TipoCambio>() { JsonConvert.DeserializeObject<TipoCambio>(json) };
+                    }
 
-                    txtMep.Text = venta.ToString();
-                    lMep.Text = now.ToString();
+                    ActualizarTextBoxes();
                 }
                 else
                 {
-                    txtMep.Text = "Error al obtener datos";
+                    txtReal.Text = "Error al obtener datos del Real"; // Update Textbox for Euro
                 }
             }
 
             using (var httpClient = new HttpClient())
             {
-                var uri = new Uri("https://dolarapi.com/v1/dolares/tarjeta");
+                var uri = new Uri("https://dolarapi.com/v1/cotizaciones/clp");
 
                 var response = await httpClient.GetAsync(uri);
 
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
-                    var datos = JsonConvert.DeserializeObject<dynamic>(json);
 
-                    var venta = datos.venta;
+                    if (json.StartsWith("["))
+                    {
+                        _tipoCambios = JsonConvert.DeserializeObject<List<TipoCambio>>(json);
+                    }
+                    else
+                    {
+                        _tipoCambios = new List<TipoCambio>() { JsonConvert.DeserializeObject<TipoCambio>(json) };
+                    }
 
-                    txtTarjeta.Text = venta.ToString();
-                    lTarjeta.Text = now.ToString();
+                    ActualizarTextBoxes();
                 }
                 else
                 {
-                    txtTarjeta.Text = "Error al obtener datos";
+                    txtChileno.Text = "Error al obtener datos del Peso Chileno"; 
                 }
             }
 
+            using (var httpClient = new HttpClient())
+            {
+                var uri = new Uri("https://dolarapi.com/v1/cotizaciones/uyu");
+
+                var response = await httpClient.GetAsync(uri);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+
+                    if (json.StartsWith("["))
+                    {
+                        _tipoCambios = JsonConvert.DeserializeObject<List<TipoCambio>>(json);
+                    }
+                    else
+                    {
+                        _tipoCambios = new List<TipoCambio>() { JsonConvert.DeserializeObject<TipoCambio>(json) };
+                    }
+
+                    ActualizarTextBoxes();
+                }
+                else
+                {
+                    txtUruguayo.Text = "Error al obtener datos del Peso Uruguayo"; 
+                }
+            }
+        }
+
+        private void ActualizarTextBoxes()
+        {
+            if (_tipoCambios != null)
+            {
+                foreach (var tipoCambio in _tipoCambios)
+                {
+                    if (tipoCambio.Moneda == "USD")
+                    {
+                        switch (tipoCambio.Casa)
+                        {
+                            case "oficial":
+                                txtOficial.Text = tipoCambio.Venta.ToString();
+                                lOficial.Text = tipoCambio.FechaActualizacion.ToString();
+                                lOficial.Visible = true;
+                                break;
+                            case "blue":
+                                txtBlue.Text = tipoCambio.Venta.ToString();
+                                lBlue.Text = tipoCambio.FechaActualizacion.ToString();
+                                lBlue.Visible = true;
+                                break;
+                            case "bolsa":
+                                txtMep.Text = tipoCambio.Venta.ToString();
+                                lMep.Text = tipoCambio.FechaActualizacion.ToString();
+                                lMep.Visible = true;
+                                break;
+                            case "tarjeta":
+                                txtTarjeta.Text = tipoCambio.Venta.ToString();
+                                lTarjeta.Text = tipoCambio.FechaActualizacion.ToString();
+                                lTarjeta.Visible = true;
+                                break;
+                        }
+                    }
+
+                    if (tipoCambio.Moneda == "EUR")
+                    {
+                        txtEuro.Text = tipoCambio.Venta.ToString();
+                        lEuro.Text = tipoCambio.FechaActualizacion.ToString();
+                        lEuro.Visible = true;
+                    }
+                    if (tipoCambio.Moneda == "BRL")
+                    {
+                        txtReal.Text = tipoCambio.Venta.ToString();
+                        lReal.Text = tipoCambio.FechaActualizacion.ToString();
+                        lReal.Visible = true;
+                    }
+                    if (tipoCambio.Moneda == "CLP")
+                    {
+                        txtChileno.Text = tipoCambio.Venta.ToString();
+                        lChileno.Text = tipoCambio.FechaActualizacion.ToString();
+                        lChileno.Visible = true;
+                    }
+                    if (tipoCambio.Moneda == "UYU")
+                    {
+                        txtUruguayo.Text = tipoCambio.Venta.ToString();
+                        lUruguayo.Text = tipoCambio.FechaActualizacion.ToString();
+                        lUruguayo.Visible = true;
+                    }
+
+                }
+            }
 
 
         }
+
 
         private void btnCalc_Click(object sender, EventArgs e)
         {
@@ -149,10 +252,24 @@ namespace DolarCalc
             {
                 output = double.Parse(txtTarjeta.Text);
             }
+            if (rbEuro.Checked)
+            {
+                output = double.Parse(txtEuro.Text);
+            }
+            if (rbReal.Checked)
+            {
+                output = double.Parse(txtReal.Text);
+            }
+            if (rbChileno.Checked)
+            {
+                output = double.Parse(txtChileno.Text);
+            }
+            if (rbUruguayo.Checked)
+            {
+                output = double.Parse(txtUruguayo.Text);
+            }
 
         }
-
-
 
     }
 }
