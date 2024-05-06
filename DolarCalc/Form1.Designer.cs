@@ -51,6 +51,7 @@
             lTarjeta = new Label();
             lMep = new Label();
             lBlue = new Label();
+            lFecha = new Label();
             gb1.SuspendLayout();
             SuspendLayout();
             // 
@@ -180,9 +181,9 @@
             label5.AutoSize = true;
             label5.Location = new Point(581, 59);
             label5.Name = "label5";
-            label5.Size = new Size(142, 15);
+            label5.Size = new Size(174, 15);
             label5.TabIndex = 13;
-            label5.Text = "Monto en ARS a convertir";
+            label5.Text = "Monto en U$S a convertir a ARS";
             // 
             // txtOutput
             // 
@@ -256,11 +257,22 @@
             lBlue.Size = new Size(0, 15);
             lBlue.TabIndex = 18;
             // 
+            // lFecha
+            // 
+            lFecha.AutoSize = true;
+            lFecha.Location = new Point(258, 32);
+            lFecha.Name = "lFecha";
+            lFecha.Size = new Size(159, 15);
+            lFecha.TabIndex = 19;
+            lFecha.Text = "Fecha actualización del dolar";
+            lFecha.Visible = false;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(lFecha);
             Controls.Add(lBlue);
             Controls.Add(lMep);
             Controls.Add(lTarjeta);
@@ -313,5 +325,6 @@
         private Label lTarjeta;
         private Label lMep;
         private Label lBlue;
+        private Label lFecha;
     }
 }

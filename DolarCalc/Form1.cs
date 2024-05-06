@@ -7,9 +7,7 @@ namespace DolarCalc
     public partial class Form1 : Form
     {
         private double input, output;
-        private int dolarSelect;
-        private string valorSeleccionado;
-        DateTime now = DateTime.Now;
+
         public Form1()
         {
             InitializeComponent();
@@ -23,7 +21,7 @@ namespace DolarCalc
 
         private async void refresh()
         {
-
+            DateTime now = DateTime.Now;
             using (var httpClient = new HttpClient())
             {
                 var uri = new Uri("https://dolarapi.com/v1/dolares/oficial");
@@ -113,7 +111,7 @@ namespace DolarCalc
                 }
             }
 
-
+            lFecha.Visible = true;
 
         }
 
